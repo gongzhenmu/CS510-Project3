@@ -7,6 +7,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.utils import Sequence
 from sklearn.metrics import roc_curve, auc
+from text_rnn import TextRNN
 import matplotlib.pyplot as plt
 
 with open('data/y_train.pickle', 'rb') as handle:
@@ -33,22 +34,27 @@ Y_valid = Y_valid[:25000]
 
 # Encode training, valid and test instances
 encoder = tfds.features.text.TokenTextEncoder(vocabulary_set)
-
+maxlen = 1000
+max_features = encoder.vocab_size
+embedding_dims = 64
+epochs = 10
 # Model Definition
-model = tf.keras.Sequential([
-    tf.keras.layers.Embedding(encoder.vocab_size, 64),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64,  return_sequences=True)),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32)),
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dropout(0.5),
-    tf.keras.layers.Dense(1, activation='sigmoid')
-])
+# model = tf.keras.Sequential([
+#     tf.keras.layers.Embedding(encoder.vocab_size, 64),
+#     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64,  return_sequences=True)),
+#     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32)),
+#     tf.keras.layers.Dense(64, activation='relu'),
+#     tf.keras.layers.Dropout(0.5),
+#     tf.keras.layers.Dense(1, activation='sigmoid')
+# ])
+model = TextRNN(maxlen,max_features,embedding_dims);
 
-model.compile(loss='binary_crossentropy',
-              optimizer=tf.keras.optimizers.Adam(1e-4),
-              metrics=['accuracy'])
+# model.compile(loss='binary_crossentropy',
+#               optimizer=tf.keras.optimizers.Adam(1e-4),
+#               metrics=['accuracy'])
+model.compile('adam', 'binary_crossentropy', metrics=['accuracy'])
 
-model.summary()
+# model.summary()
 batch_size = 16
 
 # Building generators
@@ -64,7 +70,7 @@ class CustomGenerator(Sequence):
     def __getitem__(self, idx):
         batch_x = self.text[idx * self.batch_size:(idx + 1) * self.batch_size]
         batch_y = self.labels[idx * self.batch_size:(idx + 1) * self.batch_size]
-        return batch_x, batch_y
+        return np.array(batch_x), np.array(batch_y)
 
 
 train_gen = CustomGenerator(X_train, Y_train, batch_size)
