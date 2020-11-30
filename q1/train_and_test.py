@@ -72,8 +72,6 @@ valid_gen = CustomGenerator(X_valid, Y_valid, batch_size)
 test_gen = CustomGenerator(X_test, Y_test, batch_size)
 
 
-
-
 # Training the model
 checkpointer = ModelCheckpoint('data/models/model-{epoch:02d}-{val_loss:.5f}.hdf5',
                                monitor='val_loss',
@@ -87,8 +85,6 @@ his1 = model.fit_generator(
                     epochs=1,
                     validation_data=valid_gen,
                     callbacks=callback_list)
-                    
-                    
                     
                     
 predIdxs = model.predict_generator(test_gen, verbose=1)

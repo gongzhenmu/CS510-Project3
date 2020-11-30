@@ -10,21 +10,22 @@ from sklearn.metrics import roc_curve, auc
 from text_att_birnn import TextAttBiRNN
 import matplotlib.pyplot as plt
 
-with open('data/y_train.pickle', 'rb') as handle:
+with open('../../data/y_train.pickle', 'rb') as handle:
     Y_train = pickle.load(handle)
-with open('data/y_test.pickle', 'rb') as handle:
+with open('../../data/y_test.pickle', 'rb') as handle:
     Y_test = pickle.load(handle)
-with open('data/y_valid.pickle', 'rb') as handle:
+with open('../../data/y_valid.pickle', 'rb') as handle:
     Y_valid = pickle.load(handle)
 
-with open('data/x_train.pickle', 'rb') as handle:
+with open('../../data/x_train.pickle', 'rb') as handle:
     X_train = pickle.load(handle)
-with open('data/x_test.pickle', 'rb') as handle:
+with open('../../data/x_test.pickle', 'rb') as handle:
     X_test = pickle.load(handle)
-with open('data/x_valid.pickle', 'rb') as handle:
+with open('../../data/x_valid.pickle', 'rb') as handle:
     X_valid = pickle.load(handle)
-with open('data/vocab_set.pickle', 'rb') as handle:
+with open('../../data/vocab_set.pickle', 'rb') as handle:
     vocabulary_set = pickle.load(handle)
+
 X_train = X_train[:50000]
 Y_train = Y_train[:50000]
 X_test = X_test[:25000]
@@ -39,19 +40,8 @@ max_features = encoder.vocab_size
 embedding_dims = 64
 
 # Model Definition
-# model = tf.keras.Sequential([
-#     tf.keras.layers.Embedding(encoder.vocab_size, 64),
-#     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64,  return_sequences=True)),
-#     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32)),
-#     tf.keras.layers.Dense(64, activation='relu'),
-#     tf.keras.layers.Dropout(0.5),
-#     tf.keras.layers.Dense(1, activation='sigmoid')
-# ])
-model = TextAttBiRNN(maxlen,max_features,embedding_dims);
+model = TextAttBiRNN(maxlen,max_features,embedding_dims)
 
-# model.compile(loss='binary_crossentropy',
-#               optimizer=tf.keras.optimizers.Adam(1e-4),
-#               metrics=['accuracy'])
 model.compile('adam', 'binary_crossentropy', metrics=['accuracy'])
 
 # model.summary()
@@ -77,11 +67,8 @@ train_gen = CustomGenerator(X_train, Y_train, batch_size)
 valid_gen = CustomGenerator(X_valid, Y_valid, batch_size)
 test_gen = CustomGenerator(X_test, Y_test, batch_size)
 
-
-
-
 # Training the model
-checkpointer = ModelCheckpoint('data/models/model-{epoch:02d}-{val_loss:.5f}.hdf5',
+checkpointer = ModelCheckpoint('../../data/models/model-{epoch:02d}-{val_loss:.5f}.hdf5',
                                monitor='val_loss',
                                verbose=1,
                                save_best_only=True,
@@ -93,8 +80,6 @@ his1 = model.fit_generator(
                     epochs=1,
                     validation_data=valid_gen,
                     callbacks=callback_list)
-                    
-                    
                     
                     
 predIdxs = model.predict_generator(test_gen, verbose=1)
